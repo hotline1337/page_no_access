@@ -19,9 +19,9 @@ std::function<PIMAGE_SECTION_HEADER(const char*)> get_section_by_name = [](const
 	}
 
 	return []()
-    { 
-        return nullptr; 
-    }();
+    	{ 
+        	return nullptr; 
+    	}();
 }
 
 std::function<void(PIMAGE_SECTION_HEADER)> encrypt_section = [](PIMAGE_SECTION_HEADER section) 
@@ -30,7 +30,7 @@ std::function<void(PIMAGE_SECTION_HEADER)> encrypt_section = [](PIMAGE_SECTION_H
 	int valid_page_count = section->Misc.VirtualSize / 0x1000;
 	for (auto page_idx = 0; page_idx < valid_page_count; page_idx++)
 	{
-        DWORD old;
+        	DWORD old;
 		uintptr_t address = modulebase + section->VirtualAddress + page_idx * 0x1000;
 		
 		LI_FN(VirtualProtect)(reinterpret_cast<LPVOID>(address), 0x1000, PAGE_EXECUTE_READWRITE, &old);
@@ -55,9 +55,9 @@ std::function<bool(uint64_t)> find_rip_in_module = [](uint64_t rip)
 		if ((rip >= reinterpret_cast<uint64_t>(module->DllBase)) && (rip <= reinterpret_cast<uint64_t>(module->DllBase) + nt->OptionalHeader.SizeOfImage))
 		{
 			return []() 
-            { 
-                return true; 
-            }();
+            		{ 
+                		return true; 
+            		}();
 		}
 		list = list->Flink;
 	}
@@ -74,27 +74,27 @@ std::function<long __stdcall(struct _EXCEPTION_POINTERS*)> handler = [](struct _
 		page_start = page_start - (page_start % 0x1000);
     
 		if (!find_rip_in_module(ExceptionInfo->ContextRecord->Rip))
-            return []() 
-            { 
-                return EXCEPTION_CONTINUE_SEARCH; 
-            }();
+            	return []() 
+            	{ 
+               	 	return EXCEPTION_CONTINUE_SEARCH; 
+            	}();
 
 		LI_FN(VirtualProtect)(reinterpret_cast<LPVOID>(page_start), 0x1000, PAGE_READWRITE, &old);
 		for (auto off = 0; off < 0x1000; off += 0x1)
-        {
+        	{
 			*reinterpret_cast<BYTE*>(page_start + off) = (_rotl8(*reinterpret_cast<BYTE*>(page_start + off), 69) ^ encryption_key) - 0x10;
 		}
     
 		LI_FN(VirtualProtect)(reinterpret_cast<LPVOID>(page_start), 0x1000, PAGE_EXECUTE_READ, &old);
 		return []() 
-        { 
-            return EXCEPTION_CONTINUE_SEARCH; 
-        }();
+        	{ 
+           		 return EXCEPTION_CONTINUE_SEARCH; 
+       		}();
 	}
 	return []() 
-    { 
-        return EXCEPTION_CONTINUE_SEARCH; 
-    }();
+    	{ 
+        	return EXCEPTION_CONTINUE_SEARCH; 
+    	}();
 }
 
 /* main function */
