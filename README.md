@@ -10,7 +10,7 @@ We specify the section by using it's name, we encrypt it and set the protection 
 
 auto main(void) -> int
 {
-    initialize_protection(".text");
+    page_guard::section::initialize_protection(".text");
     
     /* ... */
     
