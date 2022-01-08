@@ -22,7 +22,7 @@ std::function<PIMAGE_SECTION_HEADER(const char*)> get_section_by_name = [](const
     	{ 
         	return nullptr; 
     	}();
-}
+};
 
 std::function<void(PIMAGE_SECTION_HEADER)> encrypt_section = [](PIMAGE_SECTION_HEADER section) 
 {
@@ -40,7 +40,7 @@ std::function<void(PIMAGE_SECTION_HEADER)> encrypt_section = [](PIMAGE_SECTION_H
 		}
 		LI_FN(VirtualProtect)(reinterpret_cast<LPVOID>(address), 0x1000, PAGE_NOACCESS, &old);
 	}
-}
+};
 
 std::function<bool(uint64_t)> find_rip_in_module = [](uint64_t rip) 
 {
@@ -63,7 +63,7 @@ std::function<bool(uint64_t)> find_rip_in_module = [](uint64_t rip)
 	}
 
 	return false;
-}
+};
 
 std::function<long __stdcall(struct _EXCEPTION_POINTERS*)> handler = [](struct _EXCEPTION_POINTERS* ExceptionInfo) 
 {
@@ -95,20 +95,23 @@ std::function<long __stdcall(struct _EXCEPTION_POINTERS*)> handler = [](struct _
     	{ 
         	return EXCEPTION_CONTINUE_SEARCH; 
     	}();
-}
+};
 
 /* main function */
-std::function<void(const char*)> initialize_protection = [](const char* section_to_encrypt) 
+namespace page_guard::section
 {
-	LI_FN(srand)(time(nullptr));
-	encryption_key = rand() % 255 + 1;
-
-	LI_FN(AddVectoredExceptionHandler)(0x1, handler);
-	encrypt_section(get_section_by_name(section_to_encrypt));
-	for (auto i = 0; i < reinterpret_cast<uint64_t>(find_rip_in_module) - reinterpret_cast<uint64_t>(encrypt_section); i += 0x1) 
+	std::function<void(const char*)> initialize_protection = [](const char* section_to_encrypt) 
 	{
-		*reinterpret_cast<uint8_t*>(reinterpret_cast<uint64_t>(encrypt_section) + i) = 0x0;
-	}
+		LI_FN(srand)(time(nullptr));
+		encryption_key = rand() % 255 + 1;
+
+		LI_FN(AddVectoredExceptionHandler)(0x1, handler);
+		encrypt_section(get_section_by_name(section_to_encrypt));
+		for (auto i = 0; i < reinterpret_cast<uint64_t>(find_rip_in_module) - reinterpret_cast<uint64_t>(encrypt_section); i += 0x1) 
+		{
+			*reinterpret_cast<uint8_t*>(reinterpret_cast<uint64_t>(encrypt_section) + i) = 0x0;
+		}
+	};
 }
 
 #pragma code_seg(pop, ".vm")
