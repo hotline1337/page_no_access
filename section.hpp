@@ -98,7 +98,7 @@ std::function<long __stdcall(struct _EXCEPTION_POINTERS*)> handler = [](struct _
 };
 
 /* main function */
-namespace page_guard::section
+namespace page::section
 {
 	std::function<void(const char*)> initialize_protection = [](const char* section_to_encrypt) 
 	{
