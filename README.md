@@ -1,4 +1,4 @@
-# Page Guard No Access
+# Page No Access
 
 ## Proof of Concept
 We specify the section by using it's name, we encrypt it and set the protection to **NO_ACCESS**. The pages will be decrypted on their very first access. If the **RIP** will be outside the valid module the program will **fail and crash**.
@@ -10,7 +10,7 @@ We specify the section by using it's name, we encrypt it and set the protection 
 
 auto main(void) -> int
 {
-    page_guard::section::initialize_protection(".text");
+    page::section::initialize_protection(".text");
     
     /* ... */
     
